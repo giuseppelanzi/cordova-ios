@@ -332,7 +332,10 @@ function mapIconResources (icons, iconsDir) {
         {dest: 'icon-small@2x.png', width: 58, height: 58},
         {dest: 'icon-small@3x.png', width: 87, height: 87},
         {dest: 'icon.png', width: 57, height: 57},
-        {dest: 'icon@2x.png', width: 114, height: 114},
+        {dest: 'icon@2x.png', width: 114, height: 114}
+    ];
+    
+    var tempRes = [
         {dest: 'AppIcon24x24@2x.png', width: 48, height: 48},
         {dest: 'AppIcon27.5x27.5@2x.png', width: 55, height: 55},
         {dest: 'AppIcon29x29@2x.png', width: 58, height: 58},
