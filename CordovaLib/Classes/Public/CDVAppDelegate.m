@@ -23,22 +23,21 @@
 
 @synthesize window, viewController;
 
-- (id)init
-{
-    /** If you need to do any extra app-specific initialization, you can do it here
-     *  -jm
-     **/
-    NSHTTPCookieStorage* cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+-(id) init {
+  /** If you need to do any extra app-specific initialization, you can do it here
+   *  -jm
+   **/
+  NSHTTPCookieStorage* cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
 
-    [cookieStorage setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyAlways];
+  [cookieStorage setCookieAcceptPolicy : NSHTTPCookieAcceptPolicyAlways];
 
-    int cacheSizeMemory = 8 * 1024 * 1024; // 8MB
-    int cacheSizeDisk = 32 * 1024 * 1024; // 32MB
-    NSURLCache* sharedCache = [[NSURLCache alloc] initWithMemoryCapacity:cacheSizeMemory diskCapacity:cacheSizeDisk diskPath:@"nsurlcache"];
-    [NSURLCache setSharedURLCache:sharedCache];
+  int cacheSizeMemory = 8 * 1024 * 1024; // 8MB
+  int cacheSizeDisk = 32 * 1024 * 1024; // 32MB
+  NSURLCache* sharedCache = [[NSURLCache alloc] initWithMemoryCapacity : cacheSizeMemory diskCapacity : cacheSizeDisk diskPath : @"nsurlcache"];
+  [NSURLCache setSharedURLCache : sharedCache];
 
-    self = [super init];
-    return self;
+  self = [super init];
+  return self;
 }
 
 #pragma mark UIApplicationDelegate implementation
@@ -46,73 +45,72 @@
 /**
  * This is main kick off after the app inits, the views and Settings are setup here. (preferred - iOS4 and up)
  */
-- (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
-{
-    CGRect screenBounds = [[UIScreen mainScreen] bounds];
+-(BOOL) application : (UIApplication*) application didFinishLaunchingWithOptions : (NSDictionary*) launchOptions {
+  CGRect screenBounds = [[UIScreen mainScreen] bounds];
 
-    self.window = [[UIWindow alloc] initWithFrame:screenBounds];
-    self.window.autoresizesSubviews = YES;
+  self.window = [[UIWindow alloc] initWithFrame : screenBounds];
+  self.window.autoresizesSubviews = YES;
 
-    // only set if not already set in subclass
-    if (self.viewController == nil) {
-        self.viewController = [[CDVViewController alloc] init];
-    }
+  // only set if not already set in subclass
+  if (self.viewController == nil) {
+    self.viewController = [[CDVViewController alloc] init];
+  }
 
-    // Set your app's start page by setting the <content src='foo.html' /> tag in config.xml.
-    // If necessary, uncomment the line below to override it.
-    // self.viewController.startPage = @"index.html";
+  // Set your app's start page by setting the <content src='foo.html' /> tag in config.xml.
+  // If necessary, uncomment the line below to override it.
+  // self.viewController.startPage = @"index.html";
 
-    // NOTE: To customize the view's frame size (which defaults to full screen), override
-    // [self.viewController viewWillAppear:] in your view controller.
+  // NOTE: To customize the view's frame size (which defaults to full screen), override
+  // [self.viewController viewWillAppear:] in your view controller.
 
-    self.window.rootViewController = self.viewController;
-    [self.window makeKeyAndVisible];
+  self.window.rootViewController = self.viewController;
+  [self.window makeKeyAndVisible];
 
-    return YES;
+  return YES;
 }
 
 // this happens while we are running ( in the background, or from within our own app )
 // only valid if 40x-Info.plist specifies a protocol to handle
-- (BOOL)application:(UIApplication*)application openURL:(NSURL*)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation
-{
-    if (!url) {
-        return NO;
-    }
 
-    NSMutableDictionary * openURLData = [[NSMutableDictionary alloc] init];
+-(BOOL) application : (UIApplication *) app openURL : (NSURL *) url options : (NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
+  if (!url) {
+    return NO;
+  }
 
-    [openURLData setValue:url forKey:@"url"];
+  NSMutableDictionary * openURLData = [[NSMutableDictionary alloc] init];
 
-    if (sourceApplication) {
-        [openURLData setValue:sourceApplication forKey:@"sourceApplication"];
-    }
+  [openURLData setValue : url forKey : @"url"];
 
-    if (annotation) {
-        [openURLData setValue:annotation forKey:@"annotation"];
-    }
+  if (options[UIApplicationOpenURLOptionsSourceApplicationKey]) {
+    [openURLData setValue : options[UIApplicationOpenURLOptionsSourceApplicationKey] forKey : @"sourceApplication"];
+  }
 
-    // all plugins will get the notification, and their handlers will be called
-    [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:CDVPluginHandleOpenURLNotification object:url]];
-    [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:CDVPluginHandleOpenURLWithAppSourceAndAnnotationNotification object:openURLData]];
+  if (options[UIApplicationOpenURLOptionsAnnotationKey]) {
+    [openURLData setValue : options[UIApplicationOpenURLOptionsAnnotationKey] forKey : @"annotation"];
+  }
 
-    return YES;
+  // all plugins will get the notification, and their handlers will be called
+  [[NSNotificationCenter defaultCenter] postNotification : [NSNotification notificationWithName : CDVPluginHandleOpenURLNotification object : url]];
+  [[NSNotificationCenter defaultCenter] postNotification : [NSNotification notificationWithName : CDVPluginHandleOpenURLWithAppSourceAndAnnotationNotification object : openURLData]];
+
+  return YES;
 }
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED < 90000  
-- (NSUInteger)application:(UIApplication*)application supportedInterfaceOrientationsForWindow:(UIWindow*)window
+#if __IPHONE_OS_VERSION_MAX_ALLOWED < 90000
+-(NSUInteger) application : (UIApplication*) application supportedInterfaceOrientationsForWindow : (UIWindow*) window
 #else //CB-12098.  Defaults to UIInterfaceOrientationMask for iOS 9+
-- (UIInterfaceOrientationMask)application:(UIApplication*)application supportedInterfaceOrientationsForWindow:(UIWindow*)window
+
+- (UIInterfaceOrientationMask) application : (UIApplication*) application supportedInterfaceOrientationsForWindow : (UIWindow*) window
 #endif
 {
-    // iPhone doesn't support upside down by default, while the iPad does.  Override to allow all orientations always, and let the root view controller decide what's allowed (the supported orientations mask gets intersected).
-    NSUInteger supportedInterfaceOrientations = (1 << UIInterfaceOrientationPortrait) | (1 << UIInterfaceOrientationLandscapeLeft) | (1 << UIInterfaceOrientationLandscapeRight) | (1 << UIInterfaceOrientationPortraitUpsideDown);
+  // iPhone doesn't support upside down by default, while the iPad does.  Override to allow all orientations always, and let the root view controller decide what's allowed (the supported orientations mask gets intersected).
+  NSUInteger supportedInterfaceOrientations = (1 << UIInterfaceOrientationPortrait) | (1 << UIInterfaceOrientationLandscapeLeft) | (1 << UIInterfaceOrientationLandscapeRight) | (1 << UIInterfaceOrientationPortraitUpsideDown);
 
-    return supportedInterfaceOrientations;
+  return supportedInterfaceOrientations;
 }
 
-- (void)applicationDidReceiveMemoryWarning:(UIApplication*)application
-{
-    [[NSURLCache sharedURLCache] removeAllCachedResponses];
+-(void) applicationDidReceiveMemoryWarning : (UIApplication*) application {
+  [[NSURLCache sharedURLCache] removeAllCachedResponses];
 }
 
 @end
